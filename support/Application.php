@@ -239,7 +239,8 @@ class Application
                 'router' => 'support\Router',
                 'response' => 'support\Response',
                 'security'=> 'support\Security',
-                'log'=>'support\Log'
+                'log'=>'support\Log',
+                'user'=>'support\User'
             ];
     }
     
