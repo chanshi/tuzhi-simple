@@ -18,7 +18,7 @@ use support\database\query\UpdateQuery;
  * Class ActionRecordTrait
  * @package support\database
  */
-trait ActionRecordTrait
+trait ActiveRecordTrait
 {
 
     public static function getDb()
@@ -88,7 +88,7 @@ trait ActionRecordTrait
         }
         return $Object;
     }
-    
+
     /**
      * @param $condition
      * @return bool

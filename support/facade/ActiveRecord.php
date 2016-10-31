@@ -6,7 +6,7 @@
  * Time: 15:31
  */
 
-class ActiveRecord extends \support\database\ActionRecord
+class ActiveRecord extends \support\database\ActiveRecord
 {
     
 }

@@ -103,6 +103,10 @@ class Errors extends Object
         }
     }
 
+    /**
+     * @param $error
+     * @return bool
+     */
     public static function isFatalError($error)
     {
         return isset($error['type']) &&
@@ -117,7 +121,9 @@ class Errors extends Object
             ]);
     }
 
-
+    /**
+     * @param $exception
+     */
     public function renderException( $exception )
     {
 

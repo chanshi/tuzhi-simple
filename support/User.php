@@ -11,9 +11,7 @@ namespace support;
 use support\model\Model;
 
 /**
- *
  * 简单处理
- *
  *
  * Class User
  * @package support

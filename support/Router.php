@@ -10,6 +10,10 @@ namespace support;
 
 use App;
 
+/**
+ * Class Router
+ * @package support
+ */
 class Router extends Object
 {
 
@@ -71,10 +75,11 @@ class Router extends Object
                 }
             }
         }
+        //TODO::
         if( App::envInProduction() ){
             \Response::sendNotFoundFiles();
         }else{
-            throw new \Exception('Not Found Control '.$this->controlClass);
+            throw new \Exception('Not Found Page '.$this->controlClass);
         }
     }
     
@@ -88,7 +93,7 @@ class Router extends Object
         $info = explode('/',$path);
         
         $this->control = isset($info[0]) && !empty($info[0]) ? ucfirst(strtolower( $info[0] )) : 'Index';
-        $this->action = isset($info[1]) && !empty($info[1]) ? ucfirst( $info[1] )  : 'default';
+        $this->action  = isset($info[1]) && !empty($info[1]) ? ucfirst( $info[1] )  : 'default';
 
         $this->controlClass = $this->controlNamespace.'\\'.$this->control.'Control';
 

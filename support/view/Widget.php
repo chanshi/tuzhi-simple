@@ -10,14 +10,24 @@ namespace support\view;
 
 class Widget
 {
-
+    /**
+     * @var
+     */
     public $html;
 
+    /**
+     *
+     */
     public static function begin(){}
 
+    /**
+     *
+     */
     public static function end(){}
 
-
+    /**
+     * @return mixed
+     */
     public function __toString()
     {
         return $this->html;

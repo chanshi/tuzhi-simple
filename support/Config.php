@@ -8,16 +8,32 @@
 
 namespace support;
 
-
+/**
+ * Class Config
+ * @package support
+ */
 class Config extends Object
 {
 
+    /**
+     * @var array
+     */
     public static $config = [];
 
+    /**
+     * @var
+     */
     public $path;
 
+    /**
+     * @var
+     */
     public $loadFile;
 
+    /**
+     * Config constructor.
+     * @param array $config
+     */
     public function __construct( $config )
     {
         if(!isset($config['config'])) return;
@@ -25,7 +41,9 @@ class Config extends Object
 
     }
 
-
+    /**
+     *
+     */
     public function init()
     {
         foreach( $this->loadFile as $file ){
@@ -37,6 +55,11 @@ class Config extends Object
         }
     }
 
+    /**
+     * @param $file
+     * @return bool
+     * @throws \Exception
+     */
     protected function loadFileConfig( $file )
     {
         if( file_exists($file) ){

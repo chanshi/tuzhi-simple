@@ -8,13 +8,19 @@
 
 namespace support;
 
+/**
+ * Class Control
+ * @package support
+ */
 class Control
 {
 
-    public function goHome()
+    /**
+     * goHome
+     */
+    protected function goHome()
     {
         \Response::redirect('/');
     }
-
 
 }

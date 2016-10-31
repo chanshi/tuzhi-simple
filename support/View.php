@@ -29,10 +29,10 @@ class View extends Object
      * @var string
      */
     protected $layoutName = 'main';
-    
-    
 
-
+    /**
+     *
+     */
     public function init()
     {
         $this->viewPath = rtrim( App::alias( $this->viewPath ) ,'/' ).'/';

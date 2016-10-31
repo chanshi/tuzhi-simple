@@ -8,29 +8,36 @@
 
 namespace support\model;
 
+
 use support\Object;
+
 
 /**
  * Class Model
- * @package support\model
+ * @package tuzhi\model
  */
-class Model extends Object implements \Countable ,\ArrayAccess ,\IteratorAggregate
+class Model extends Object implements \Countable ,\ArrayAccess, \IteratorAggregate
 {
 
     /**
-     * @var array
+     * @var
      */
     protected $attributes = [];
 
     /**
-     * @var array
+     * @var
      */
-    protected $oldAttributes = [];
+    protected $attLabel = [];
 
     /**
      * @var array
      */
-    protected $attLabel = [];
+    protected $attAllow = [];
+
+    /**
+     * @var array
+     */
+    protected $attDeny = [];
 
     /**
      * @var array
@@ -40,66 +47,129 @@ class Model extends Object implements \Countable ,\ArrayAccess ,\IteratorAggrega
     /**
      * @var array
      */
-    protected $attRules = [];
-
-    /**
-     * @var array
-     */
     protected $attMaps = [];
 
     /**
-     * @var array
+     * @var array  其他字段
      */
-    protected $attFilter = [];
-
-    protected $denyAtt = [];
-
-    /**
-     * @var string
-     */
-    //public $validClass  = 'support\validators\Validator';
-    public $validClass  = 'support\ValidData';
+    protected $attExt =[];
 
     /**
      * @var null
      */
-    protected $validator = null ;
+    protected $validator = null;
 
     /**
-     * @return mixed
+     * @var array 验证规则
+     */
+    protected $rules = [];
+
+    /**
+     * @var string
+     */
+    protected $validClass = 'support\model\validators\Validator';
+
+    /**
+     * @var array
+     */
+    private $errors =
+        [
+            'system' => '',
+            'verify' =>[]
+        ];
+
+
+    /**
+     * Init
      */
     public function init()
     {
-        $this->attRules = $this->rules();
-        $this->attLabel = $this->labels();
-        $this->attFormat = $this->format();
+
+        $this->attLabel = $this->attLabel
+            ? $this->attLabel
+            :  $this->initLabel();
+
+        $this->rules = $this->rules
+            ? $this->rules
+            : $this->initRules();
+
+        $this->attFormat = $this->attFormat
+            ? $this->attFormat
+            : $this->initFormat();
+    }
+
+    /**
+     * @return array
+     */
+    protected function initLabel() { return [];}
+
+    /**
+     * @return array
+     */
+    protected function initRules() { return [];}
+
+    /**
+     * @return array
+     */
+    protected function initFormat() {return [];}
+
+
+    /**
+     * @param $attribute
+     * @param $labelName
+     */
+    public function setLabel( $attribute , $labelName )
+    {
+        $this->attLabel[$attribute] = $labelName;
+    }
+
+    /**
+     * @param $attribute
+     * @return mixed
+     */
+    public function getLabel( $attribute )
+    {
+        return isset( $this->attLabel[$attribute] )
+            ? $this->attLabel[$attribute]
+            : $attribute;
     }
 
     /**
      * @param $attributes
-     * @return bool
+     */
+    public function initAttributes( $attributes )
+    {
+        $this->attributes = [];
+        $this->setAttributes($attributes);
+    }
+
+    /**
+     * @param $attributes
      */
     public function setAttributes( $attributes )
     {
-        foreach($attributes as $attribute=>$value ){
-            $this->setAttribute($attribute,$value);
+        foreach( $attributes as $attribute =>$value ){
+            $this->setAttribute($attribute ,$value);
         }
-        return true;
     }
 
     /**
      * @param $attribute
      * @param $value
-     * @return mixed
+     * @return bool
      */
-    public function setAttribute( $attribute ,$value )
+    public function setAttribute( $attribute ,$value)
     {
 
-        if( $this->filterAttribute($attribute) == false ){
+        if( in_array($attribute, array_keys( $this->attMaps ) ) ){
+            $attribute = $this->attMaps[$attribute];
+        }
+
+        if( $this->isAllowAttr($attribute) == false ){
             return false;
         }
 
-        if( $this->denyAttribute($attribute) ){
+        if( $this->isDenyAttr($attribute) == true ){
             return false;
         }
 
@@ -110,29 +180,35 @@ class Model extends Object implements \Countable ,\ArrayAccess ,\IteratorAggrega
      * @param $attribute
      * @return bool
      */
-    protected function filterAttribute($attribute)
+    protected function isAllowAttr( $attribute )
     {
-        if(!empty($this->attFilter) && ! in_array($attribute ,$this->attFilter) ){
-            return false;
+        if( empty($this->attAllow) ){
+            return true;
+        }else{
+            return in_array($attribute , $this->attAllow)
+                ?  true
+                : false;
         }
-        return true;
     }
 
     /**
      * @param $attribute
      * @return bool
      */
-    protected function denyAttribute( $attribute )
+    protected function isDenyAttr( $attribute )
     {
-        if( !empty($this->denyAtt) && in_array($attribute,$this->denyAtt) ){
-            return true;
+        if( empty($this->attDeny) ) {
+            return false;
+        }else {
+            return in_array($attribute,$this->attDeny )
+                ? true
+                : false;
         }
-        return false;
     }
 
     /**
      * @param $attribute
-     * @return mixed|null
+     * @return null
      */
     public function getAttribute( $attribute )
     {
@@ -142,34 +218,84 @@ class Model extends Object implements \Countable ,\ArrayAccess ,\IteratorAggrega
     }
 
     /**
-     * @param $attribute
-     * @return mixed
+     * @return array
      */
-    public function getLabel( $attribute )
+    public function getAttributes()
     {
-        if( isset($this->attLabel[$attribute]) )
-        {
-            return $this->attLabel[$attribute];
+        return $this->attributes;
+    }
+
+    /**
+     * @param $attribute
+     * @param null $value
+     */
+    public function setExtAtt( $attribute ,$value = null)
+    {
+        if( is_array($attribute) && $value === null   ) {
+            $this->attExt = array_merge($this->attExt,$attribute);
+        }else if( is_string($attribute)  ){
+            $this->attExt[$attribute] = $value;
         }
-        return $attribute;
     }
 
     /**
      * @param $attribute
      * @return mixed|null
      */
-    public function getFormatAtt($attribute)
+    public function getExtAtt( $attribute )
     {
-        if(isset($this->attFormat[$attribute])){
-            return call_user_func($this->attFormat[$attribute] ,$this->getAttribute($attribute));
+        return isset($this->attExt[$attribute])
+            ? $this->attExt[$attribute]
+            : null;
+    }
+
+    /**
+     *
+     * @param $attribute
+     * @param null $format
+     * @return mixed|null
+     */
+    public function format( $attribute , $format = null )
+    {
+        //TODO::  规则发生改变
+        if( $format == null ){
+            return isset( $this->attFormat[$attribute] )
+                ? ( $this->attFormat[$attribute] instanceOf \Closure
+                    ?   call_user_func($this->attFormat[$attribute],$this->getAttribute($attribute))
+                    :   $this->attFormat[$attribute]
+                )
+                : $this->getAttribute($attribute);
+        }else{
+            $this->attFormat[$attribute] = $format;
+            return true;
         }
-        return $this->getAttribute($attribute);
+    }
+
+    /**
+     * @param $attribute
+     * @return bool
+     */
+    public function rmAttribute( $attribute )
+    {
+        if( isset($this->attributes[$attribute]) ){
+            unset($this->attributes[$attribute]);
+        }
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    public function removeAll()
+    {
+        $this->attributes =[];
+        return true;
     }
 
     /**
      * @param $attribute
      * @param $value
-     * @return mixed
+     * @return bool
      */
     public function __set($attribute ,$value)
     {
@@ -178,7 +304,7 @@ class Model extends Object implements \Countable ,\ArrayAccess ,\IteratorAggrega
 
     /**
      * @param $attribute
-     * @return mixed|null
+     * @return null
      */
     public function __get($attribute)
     {
@@ -186,26 +312,53 @@ class Model extends Object implements \Countable ,\ArrayAccess ,\IteratorAggrega
     }
 
     /**
+     * @param $attribute
+     * @return bool
+     */
+    public function __isset($attribute)
+    {
+        return isset($this->attributes[$attribute]);
+    }
+
+    /**
+     * @param $attribute
+     * @return bool
+     */
+    public function __unset($attribute)
+    {
+        return $this->rmAttribute($attribute);
+    }
+
+    /**
      * @return mixed
      */
     public function count()
     {
-        return count($this->attributes);
+        return count( $this->attributes );
+    }
+
+    /**
+     * @param mixed $attribute
+     * @return bool
+     */
+    public function offsetExists($attribute)
+    {
+        return isset($this->attributes[$attribute]) ;
     }
 
     /**
      * @param mixed $attribute
      * @param mixed $value
-     * @return mixed
+     * @return bool
      */
-    public function offsetSet($attribute ,$value)
+    public function offsetSet($attribute, $value)
     {
         return $this->setAttribute($attribute,$value);
     }
 
     /**
      * @param mixed $attribute
-     * @return mixed|null
+     * @return null
      */
     public function offsetGet($attribute)
     {
@@ -216,19 +369,9 @@ class Model extends Object implements \Countable ,\ArrayAccess ,\IteratorAggrega
      * @param mixed $attribute
      * @return bool
      */
-    public function offsetExists($attribute)
-    {
-        return isset($this->attributes[$attribute]);
-    }
-
-    /**
-     * @param mixed $attribute
-     */
     public function offsetUnset($attribute)
     {
-        if(isset($this->attributes[$attribute])){
-            unset($this->attributes[$attribute]);
-        }
+        return $this->rmAttribute($attribute);
     }
 
     /**
@@ -236,68 +379,110 @@ class Model extends Object implements \Countable ,\ArrayAccess ,\IteratorAggrega
      */
     public function getIterator()
     {
-        return new \ArrayIterator( $this );
+        return new \ArrayIterator( $this->attributes );
     }
 
     /**
-     * @return mixed
+     * @return bool
      */
-    protected function labels()
+    public function hasError()
     {
-        return [];
+        return $this->errors['system'] == '' && $this->getVerifyFirstError()== ''
+            ? false
+            : true;
     }
 
     /**
-     * @return mixed
+     *
      */
-    protected function rules()
+    public function getErrors()
     {
-        return [];
-    }
-
-    /**
-     * @return mixed
-     */
-    protected function format()
-    {
-        return [];
-    }
-
-    /**
-     * @return mixed
-     */
-    protected function getValidator()
-    {
-        if($this->validator == null){
-            $this->validator = new $this->validClass( $this );
-            // 设置 Rule;
-            $this->validator->setRules( $this->rules() );
-        }
-        return $this->validator;
-    }
-
-
-    public function verify( $data = null )
-    {
-        if( $data == null ){
-            $data = $this->attributes;
+        if( $this->getErrorMessage() !== '' ){
+            return $this->getErrorMessage();
         }
 
-        return $this->getValidator()->valid( $data );
+        if( $this->getVerifyFirstError() !== '' ){
+            return $this->getVerifyFirstError();
+        }
+        return '';
+    }
+
+    /**
+     * @param $message
+     */
+    public function setErrorMessage( $message )
+    {
+        $this->errors['system'] = $message;
+    }
+
+    /**
+     * @return array|string
+     */
+    public function getErrorMessage()
+    {
+        return $this->errors['system']
+            ? $this->errors['system']
+            : '';
+    }
+
+    /**
+     * @param $errors
+     */
+    public function setVerifyErrors( $errors )
+    {
+        $this->errors['verify'] = $errors;
     }
 
     /**
      * @param null $attribute
-     * @return mixed
+     * @return array|mixed
      */
-    public function getErrors( $attribute = null )
+    public function getVerifyError( $attribute = null )
     {
-        return $this->getValidator()->getErrors($attribute);
+        if( $attribute ){
+            return isset($this->errors['verify'][$attribute])
+                ? $this->errors['verify'][$attribute]
+                : [];
+        }else{
+            return $this->errors['verify'];
+        }
     }
 
-    public function getFirstError()
+    /**
+     * @return string
+     */
+    public function getVerifyFirstError()
     {
-        return $this->getValidator()->getFirstError();
+        $error = array_values($this->errors['verify']);
+        return isset( $error[0][0] )
+            ? $error[0][0]
+            : '';
+    }
+
+    /**
+     * @return mixed|null|Validator
+     */
+    public function getValidator()
+    {
+        if( ! ( $this->validator instanceof  Validator ) ){
+            $config = [
+                'class'=>$this->validClass,
+                'model'=>$this,
+                'rules'=>$this->rules
+            ];
+            $this->validator = \Tuzhi::make( $config );
+        }
+        return $this->validator;
+    }
+
+    /**
+     * @param array $attributes
+     * @param bool $all
+     * @return bool
+     */
+    public function verify( $attributes = [] ,$all = false)
+    {
+        return $this->getValidator()->verify($attributes,$all);
     }
 
 }
