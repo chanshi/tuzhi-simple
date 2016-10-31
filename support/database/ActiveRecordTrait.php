@@ -9,6 +9,7 @@
 namespace support\database;
 
 use support\database\query\DeleteQuery;
+use support\database\query\InsertQuery;
 use support\database\query\Query;
 use DB;
 use support\database\query\UpdateQuery;
@@ -35,7 +36,7 @@ trait ActionRecordTrait
 
     /**
      * @param null $Columns
-     * @return $this
+     * @return mixed
      */
     public static function find( $Columns = null )
     {
@@ -46,22 +47,25 @@ trait ActionRecordTrait
         return $Query;
     }
 
+
     /**
-     * @return static
+     * 简单粗暴
+     * @param $data
+     * @return mixed
      */
-    public static function getNewRecord()
+    public static function insert( $data = null)
     {
-        return new static();
+        return (new InsertQuery(static::tableName(), $data, ['db'=>static::getDb()] ))
+            ->insert();
     }
 
-    public static function addRecord(){}
-
     /**
-     * 修改
+     * @param null $data
+     * @return UpdateQuery
      */
-    public static function modify()
+    public static function update( $data =null)
     {
-        return (new UpdateQuery(static::tableName(),['db'=> static::getDb()]));
+        return (new UpdateQuery(static::tableName(),$data,['db'=> static::getDb()]));
     }
 
     /**
@@ -72,6 +76,19 @@ trait ActionRecordTrait
         return (new DeleteQuery(static::tableName(),['db'=> static::getDb()]));
     }
 
+    /**
+     * @param null $primary
+     * @return static
+     */
+    public static function getNewRecord($primary = null )
+    {
+        $Object = new static();
+        if( $primary ){
+            $Object->load($primary);
+        }
+        return $Object;
+    }
+    
     /**
      * @param $condition
      * @return bool
