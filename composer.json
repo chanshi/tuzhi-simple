@@ -1,6 +1,5 @@
 {
    "name":"tuzhi/tuzhi-simple",
-   //"type":"library",
    "description":"simple php framework",
    "keyword":["framework"],
    "homepage":"http://tuzhi-simple.tuzhi.org.cn",
