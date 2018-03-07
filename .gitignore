@@ -10,4 +10,5 @@ gen
 .gitignore
 .idea/
 support-tests/data/
+app
 app/runtime
