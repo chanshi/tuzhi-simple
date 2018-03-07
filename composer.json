@@ -1,0 +1,24 @@
+{
+   "name":"tuzhi/tuzhi-simple",
+   "type":"library",
+   "description":"simple php framework",
+   "keyword":["framework"],
+   "homepage":"http://tuzhi-simple.tuzhi.org.cn",
+   "license":"MIT",
+   "authors":[
+     {
+       "name":"chanshi",
+       "email":"wuse@chanshi.me",
+       "homepage":"http://chanshi.me",
+       "role":"Developer"
+     }
+   ],
+  "require":{
+    "php": ">=7.0.2"
+  },
+  "autoload":{
+    "psr-0":{
+      "Tuzhi-simple":"support"
+    }
+  }
+}
