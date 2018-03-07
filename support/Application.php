@@ -342,4 +342,12 @@ class Application
             }
         }
     }
+
+    /**
+     * @return string
+     */
+    public static function frameName()
+    {
+        return "土制(simple)";
+    }
 }
