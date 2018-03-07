@@ -1,6 +1,6 @@
 {
    "name":"tuzhi/tuzhi-simple",
-   "type":"library",
+   //"type":"library",
    "description":"simple php framework",
    "keyword":["framework"],
    "homepage":"http://tuzhi-simple.tuzhi.org.cn",
@@ -17,8 +17,8 @@
     "php": ">=7.0.2"
   },
   "autoload":{
-    "psr-0":{
-      "Tuzhi-simple":"support"
+    "psr-4":{
+      "tuzhi\\":"support"
     }
   }
 }
